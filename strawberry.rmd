@@ -1,1 +1,23 @@
+```{r}
+library(tidyverse)
+library(tidyr)
 
+strawberry <- read.csv("strawberry_oct4.csv", header = T)
+
+strwb_census <- strawberry %>% filter(Program=="CENSUS")
+strwb_survey <- strawberry %>% filter(Program=="SURVEY")
+
+#cleaning Value column
+vals <- strwb_census$Value
+vals <- gsub(",", "", vals)
+vals <- as.numeric(vals)
+
+strwb_census$Value <- vals
+
+#function
+clean_values <- function(x){
+  x <- gsub(",", "", x)
+  footnotes <- str_detect(x, "^\\([:upper:]\\)$")
+  return(unique(x[which(footnotes)]))
+}
+```
