@@ -752,6 +752,146 @@ Once the data has been cleaned and organized, you must conduct your own EDA.  Be
 <!-- ## Clean and organize strwb_survey -->
 
 ```{r}
+chemicals <- separate_wider_delim(strwb_survey, "Domain Category", delim = ": ", names = c("cide", "chemical"), too_few = "align_start")
+
+
+chemicals <- chemicals %>% select(-2)
+
+chemicals$chemical <- str_replace(chemicals$chemical, "\\(", "")
+chemicals$chemical <- str_replace(chemicals$chemical, "\\)", "")
+
+chemicals <- separate_wider_delim(chemicals, chemical, 
+                                  delim = " = ", 
+                                  names = c("Chemical_Name", "PC_Code"),
+                                  too_few = "align_start")
+
+
+#chemicals$toxicity <- ifelse(chemicals$Chemical_Name %in% ext_haz, "EXTREMELY HAZAARDOUS", NA)
+
+chemicals$cide <- str_replace(chemicals$cide, "CHEMICAL, ", "")
+chemicals$Domain <- str_replace(chemicals$Domain, "CHEMICAL, ", "")
+
+colnames(chemicals)[7] <- "Substance"
+
+```
+
+```{r}
+#PC Codes to cas codes
+
+
+chemicals$PC_Code <- ifelse(chemicals$PC_Code=="29088)", "29088", chemicals$PC_Code)
+
+chemicals$lengths <- data.frame(apply(chemicals, 2, nchar)) %>% select(PC_Code)
+chemicals$PC_Code <- ifelse(chemicals$lengths==5, paste0("0", chemicals$PC_Code), chemicals$PC_Code)
+chemicals$PC_Code <- ifelse(chemicals$lengths==4, paste0("00", chemicals$PC_Code), chemicals$PC_Code)
+chemicals$PC_Code <- ifelse(chemicals$lengths==3, paste0("000", chemicals$PC_Code), chemicals$PC_Code)
+
+
+codes <- read.csv("PCCAScodes.csv", header = TRUE)
+codes <- codes %>% select(c(1,2))
+codes$CAScode <- str_replace(codes$CAScode, "􏰂", "-")
+codes$CAScode <- str_replace(codes$CAScode, "􏰂", "-")
+codes$lengths <- data.frame(apply(codes, 2, nchar)) %>% select(PC_Code)
+codes$PC_Code <- ifelse(codes$lengths==5, paste0("0", codes$PC_Code), codes$PC_Code)
+codes$PC_Code <- ifelse(codes$lengths==4, paste0("00", codes$PC_Code), codes$PC_Code)
+codes$PC_Code <- ifelse(codes$lengths==3, paste0("000", codes$PC_Code), codes$PC_Code)
+
+
+chemicals <- left_join(chemicals, codes, by = "PC_Code") %>% select(-c(12,14))
+
+nas <- chemicals %>% filter(is.na(CAScode))
+
+chemicals$CAScode <- ifelse(chemicals$PC_Code=="016489", NA, chemicals$CAScode)
+chemicals$CAScode <- ifelse(chemicals$PC_Code=="129082", NA, chemicals$CAScode)
+chemicals$CAScode <- ifelse(chemicals$PC_Code=="016482", NA, chemicals$CAScode)
+chemicals$CAScode <- ifelse(chemicals$PC_Code=="006485", NA, chemicals$CAScode)
+chemicals$CAScode <- ifelse(chemicals$PC_Code=="006479", NA, chemicals$CAScode)
+chemicals$CAScode <- ifelse(chemicals$PC_Code=="030006", NA, chemicals$CAScode)
+chemicals$CAScode <- ifelse(chemicals$PC_Code=="006544", NA, chemicals$CAScode)
+chemicals$CAScode <- ifelse(chemicals$PC_Code=="0023306", "20543-04-8", chemicals$CAScode)
+chemicals$CAScode <- ifelse(chemicals$PC_Code=="076416", "13492-26-7", chemicals$CAScode)
+chemicals$CAScode <- ifelse(chemicals$PC_Code=="230000", "146659-78-1", chemicals$CAScode)
+chemicals$CAScode <- ifelse(chemicals$PC_Code=="073508", "298-14-6", chemicals$CAScode)
+chemicals$CAScode <- ifelse(chemicals$PC_Code=="006327", NA, chemicals$CAScode)
+chemicals$CAScode <- ifelse(chemicals$PC_Code=="077501", "7704-34-9", chemicals$CAScode)
+chemicals$CAScode <- ifelse(chemicals$PC_Code=="103601", "38641-94-0", chemicals$CAScode)
+chemicals$CAScode <- ifelse(chemicals$PC_Code=="103613", "70901-12-1", chemicals$CAScode)
+chemicals$CAScode <- ifelse(chemicals$PC_Code=="121701", "108168-76-9", chemicals$CAScode)
+chemicals$CAScode <- ifelse(chemicals$PC_Code=="128924" , "63428-82-0", chemicals$CAScode)
+chemicals$CAScode <- ifelse(chemicals$PC_Code=="006523" , "68038-71-1", chemicals$CAScode)
+chemicals$CAScode <- ifelse(chemicals$PC_Code=="006522", "68038-71-1", chemicals$CAScode)
+chemicals$CAScode <- ifelse(chemicals$PC_Code=="006453", NA, chemicals$CAScode)
+chemicals$CAScode <- ifelse(chemicals$PC_Code=="006519", NA, chemicals$CAScode)
+chemicals$CAScode <- ifelse(chemicals$PC_Code=="006426", "68038-71-1", chemicals$CAScode)
+chemicals$CAScode <- ifelse(chemicals$PC_Code=="006534", NA, chemicals$CAScode)
+chemicals$CAScode <- ifelse(chemicals$PC_Code=="011332", "120962-03-0", chemicals$CAScode)
+chemicals$CAScode <- ifelse(chemicals$PC_Code=="016329", NA, chemicals$CAScode)
+chemicals$CAScode <- ifelse(chemicals$PC_Code=="107300", NA, chemicals$CAScode)
+chemicals$CAScode <- ifelse(chemicals$PC_Code=="025006", "8002-65-1", chemicals$CAScode)
+chemicals$CAScode <- ifelse(chemicals$PC_Code=="025007", "947173-77-5", chemicals$CAScode)
+chemicals$CAScode <- ifelse(chemicals$PC_Code=="124002", "116714-46-6", chemicals$CAScode)
+chemicals$CAScode <- ifelse(chemicals$PC_Code=="079021", "67701-09-1", chemicals$CAScode)
+chemicals$CAScode <- ifelse(chemicals$PC_Code=="128955", "334-48-5", chemicals$CAScode)
+chemicals$CAScode <- ifelse(chemicals$PC_Code=="128919", "124-07-2", chemicals$CAScode)
+chemicals$CAScode <- ifelse(chemicals$PC_Code=="070704", "8023-77-6", chemicals$CAScode)
+chemicals$CAScode <- ifelse(chemicals$PC_Code=="128827", "8000-78-0", chemicals$CAScode)
+chemicals$CAScode <- ifelse(chemicals$PC_Code=="00595", "7722-84-1", chemicals$CAScode)
+chemicals$CAScode <- ifelse(chemicals$PC_Code=="034903", "10045-86-0", chemicals$CAScode)
+chemicals$CAScode <- ifelse(chemicals$PC_Code=="115002", NA, chemicals$CAScode)
+chemicals$CAScode <- ifelse(chemicals$PC_Code=="063201", "79-21-0", chemicals$CAScode)
+chemicals$CAScode <- ifelse(chemicals$PC_Code=="072606", "1312-76-1", chemicals$CAScode)
+chemicals$CAScode <- ifelse(chemicals$PC_Code=="006800" , NA, chemicals$CAScode)
+chemicals$CAScode <- ifelse(chemicals$PC_Code=="055809", NA, chemicals$CAScode)
+chemicals$CAScode <- ifelse(chemicals$PC_Code=="024409", "14215-52-2", chemicals$CAScode)
+chemicals$CAScode <- ifelse(chemicals$PC_Code=="116801", "525-79-1", chemicals$CAScode)
+chemicals$CAScode <- ifelse(chemicals$PC_Code=="046701" , "133-32-4", chemicals$CAScode)
+chemicals$CAScode <- ifelse(chemicals$PC_Code=="129068", NA, chemicals$CAScode)
+chemicals$CAScode <- ifelse(chemicals$PC_Code=="119202" , "67892-31-3", chemicals$CAScode)
+chemicals$CAScode <- ifelse(chemicals$PC_Code=="031605"  , "8001-22-7", chemicals$CAScode)
+chemicals$CAScode <- ifelse(chemicals$PC_Code=="046010"  , NA, chemicals$CAScode)
+chemicals$CAScode <- ifelse(chemicals$PC_Code=="036010", "67891-88-7", chemicals$CAScode)
+chemicals$CAScode <- ifelse(chemicals$PC_Code=="006518" , NA, chemicals$CAScode)
+chemicals$CAScode <- ifelse(chemicals$PC_Code=="129000", NA, chemicals$CAScode)
+chemicals$CAScode <- ifelse(chemicals$PC_Code=="176604" , NA, chemicals$CAScode)
+chemicals$CAScode <- ifelse(chemicals$PC_Code=="023501"  , "1332-65-6", chemicals$CAScode)
+chemicals$CAScode <- ifelse(chemicals$PC_Code=="069165" , "32426-11-2", chemicals$CAScode)
+chemicals$CAScode <- ifelse(chemicals$PC_Code=="069166"  , "5538-94-3", chemicals$CAScode)
+chemicals$CAScode <- ifelse(chemicals$PC_Code=="004901"  , "57-06-7", chemicals$CAScode)
+chemicals$CAScode <- ifelse(chemicals$PC_Code=="025601"  , "1317-39-1", chemicals$CAScode)
+chemicals$CAScode <- ifelse(chemicals$PC_Code=="031802", "63718-65-0", chemicals$CAScode)
+chemicals$CAScode <- ifelse(chemicals$PC_Code=="070701", "404-86-4", chemicals$CAScode)
+chemicals$CAScode <- ifelse(chemicals$PC_Code=="006506" , NA, chemicals$CAScode)
+chemicals$CAScode <- ifelse(chemicals$PC_Code=="139114", "15708-41-5", chemicals$CAScode)
+
+chemicals <- chemicals %>% select(-11)
+
+```
+
+
+```{r}
+#hazard levels
+hazard <- read_csv("hazard.csv")
+hazard <- hazard %>% select(-3)
+hazard <- na.omit(hazard)
+hazard$hazard_level <- ifelse(hazard$cat == "Ia" | hazard$cat == "1a", "extremely hazardous", NA)
+hazard$hazard_level <- ifelse(hazard$cat == "Ib" | hazard$cat == "1b", "highly hazardous", hazard$hazard_level)
+hazard$hazard_level <- ifelse(hazard$cat == "II", "moderately hazardous", hazard$hazard_level)
+hazard$hazard_level <- ifelse(hazard$cat == "III", "slightly hazardous", hazard$hazard_level)
+hazard$hazard_level <- ifelse(hazard$cat == "U", "unlikely to present acute hazard", hazard$hazard_level)
+hazard$hazard_level <- ifelse(hazard$cat == "FM", "fumigant, not classified", hazard$hazard_level)
+hazard$hazard_level <- ifelse(hazard$cat == "O" | hazard$cat == "o", "obsolete as pesticide, not classified", hazard$hazard_level)
+
+colnames(chemicals)[11] <- "CASCode"
+chemicals$CASCode <- str_replace(chemicals$CASCode, " ", "")
+chemicals <- left_join(chemicals, hazard, by = "CASCode")
+
+```
+
+
+
+
+
+```{r}
 #| label: strwb_survey preliminary exploration
 #| echo: false
 #| eval: true
@@ -958,6 +1098,12 @@ strwb_survey_mkt <- strwb_survey_mkt |> select(all_of(mkt1))
 
 ```
 
+
+```{r}
+
+
+```
+
 <p style="page-break-before: always"></p>
 
 ### These references have been left in the document to help while you are writing.  Cite those you use and drop the rest from the final document.
@@ -1027,4 +1173,3 @@ The EPA PC (Pesticide Chemical) Code is a unique chemical code number assigned b
 [TSCA Chemical Substance Inventory](https://www.epa.gov/tsca-inventory)
 
 [glyphosate](https://ordspub.epa.gov/ords/pesticides/f?p=CHEMICALSEARCH:3::::1,3,31,7,12,25:P3_XCHEMICAL_ID:2478)
-
