@@ -1,0 +1,13 @@
+---
+title: "Stawberries: Exploratory Data Analysis Report"
+author: Maysen Pagan
+date: 2023 Oct 18
+format: html
+engine: knitr
+---
+
+## Motivations and Initial Questions
+
+Are strawberries truly safe to consume? In 2020, the per capita consumption of the most popular berry in the United States, strawberries, was 8.5 pounds. There are many health benefits of consuming strawberries including a healthy immune system from Vitamin C and cell and tissue protection from antioxidant compounds. However, strawberries are also known for being a produce with one of the highest concentration of pesticides. According to the World Health Organization, some pesticides are potentially toxic to humans and may have a negative impact on one's immune or nervous system or may even cause cancer. These facts motivate the question regarding what pesticides are found on strawberries. Of these pesticides, which are the most toxic to humans and which are safe to consume in small quantities? Furthermore, are the use of different pesticides consistent in different states or do they vary by region? These questions all address the concern of whether or not strawberries are really safe to eat.
+
+## Data Acquisition
