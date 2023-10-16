@@ -22,6 +22,40 @@ ul.task-list li input[type="checkbox"] {
   margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
   vertical-align: middle;
 }
+/* CSS for syntax highlighting */
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+  }
+pre.numberSource { margin-left: 3em;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
 </style>
 
 
@@ -74,12 +108,221 @@ ul.task-list li input[type="checkbox"] {
 
 </header>
 
-<section id="motivations-and-initial-questions" class="level2">
-<h2 class="anchored" data-anchor-id="motivations-and-initial-questions">Motivations and Initial Questions</h2>
-<p>Are strawberries truly safe to consume? In 2020, the per capita consumption of the most popular berry in the United States, strawberries, was 8.5 pounds. There are many health benefits of consuming strawberries including a healthy immune system from Vitamin C and cell and tissue protection from antioxidant compounds. However, strawberries are also known for being a produce with one of the highest concentration of pesticides. According to the World Health Organization, some pesticides are potentially toxic to humans and may have a negative impact on one’s immune or nervous system or may even cause cancer. These facts motivate the question regarding what pesticides are found on strawberries. Of these pesticides, which are the most toxic to humans and which are safe to consume in small quantities? Furthermore, are the use of different pesticides consistent in different states or do they vary by region? These questions all address the concern of whether or not strawberries are really safe to eat.</p>
+<section id="motivations-and-initial-questions" class="level1">
+<h1>Motivations and Initial Questions</h1>
+<p>Are strawberries truly safe to consume? In 2020, the per capita consumption of the most popular berry in the United States, strawberries, was 8.5 pounds. There are many health benefits of consuming strawberries including a healthy immune system from Vitamin C as well as cell and tissue protection from antioxidant compounds. However, strawberries are also known for being a produce with one of the highest concentration of pesticides. According to the World Health Organization, some pesticides are potentially toxic to humans and may have a negative impact on one’s immune or nervous system or may even cause cancer. These facts motivate the question regarding what pesticides are found on strawberries. Of these pesticides, which are the most toxic to humans and which are safe to consume in small quantities? Furthermore, are the use of different pesticides consistent in different states or do they vary by region? These questions all address the concern of whether or not strawberries are really safe to eat.</p>
 </section>
-<section id="data-acquisition" class="level2">
-<h2 class="anchored" data-anchor-id="data-acquisition">Data Acquisition</h2>
+<section id="the-data" class="level1">
+<h1>The Data</h1>
+<p>To investigate and potentially answer some of these questions, we looked at data from the <a href="https://quickstats.nass.usda.gov">United States Department of Agriculture National Agricultural Statistics Service</a>. The original <a href="https://quickstats.nass.usda.gov/results/45FBC825-B104-38E2-9802-839F5F3C7036">downloaded data</a> from this source includes census and survey data on the sales, production and price received of strawberry products between the years 2016 and 2022. A glimpse of the original data can be viewed below.</p>
+<div class="cell">
+<div class="cell-output-display">
+<table data-quarto-postprocess="true" class="table table-sm table-striped small">
+<thead>
+<tr class="header">
+<th style="text-align: left;" data-quarto-table-cell-role="th">Program</th>
+<th style="text-align: right;" data-quarto-table-cell-role="th">Year</th>
+<th style="text-align: left;" data-quarto-table-cell-role="th">Period</th>
+<th style="text-align: left;" data-quarto-table-cell-role="th">Week Ending</th>
+<th style="text-align: left;" data-quarto-table-cell-role="th">Geo Level</th>
+<th style="text-align: left;" data-quarto-table-cell-role="th">State</th>
+<th style="text-align: left;" data-quarto-table-cell-role="th">State ANSI</th>
+<th style="text-align: left;" data-quarto-table-cell-role="th">Ag District</th>
+<th style="text-align: left;" data-quarto-table-cell-role="th">Ag District Code</th>
+<th style="text-align: left;" data-quarto-table-cell-role="th">County</th>
+<th style="text-align: left;" data-quarto-table-cell-role="th">County ANSI</th>
+<th style="text-align: left;" data-quarto-table-cell-role="th">Zip Code</th>
+<th style="text-align: left;" data-quarto-table-cell-role="th">Region</th>
+<th style="text-align: left;" data-quarto-table-cell-role="th">watershed_code</th>
+<th style="text-align: left;" data-quarto-table-cell-role="th">Watershed</th>
+<th style="text-align: left;" data-quarto-table-cell-role="th">Commodity</th>
+<th style="text-align: left;" data-quarto-table-cell-role="th">Data Item</th>
+<th style="text-align: left;" data-quarto-table-cell-role="th">Domain</th>
+<th style="text-align: left;" data-quarto-table-cell-role="th">Domain Category</th>
+<th style="text-align: left;" data-quarto-table-cell-role="th">Value</th>
+<th style="text-align: left;" data-quarto-table-cell-role="th">CV (%)</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: left;">CENSUS</td>
+<td style="text-align: right;">2021</td>
+<td style="text-align: left;">YEAR</td>
+<td style="text-align: left;">NA</td>
+<td style="text-align: left;">STATE</td>
+<td style="text-align: left;">ALASKA</td>
+<td style="text-align: left;">02</td>
+<td style="text-align: left;">NA</td>
+<td style="text-align: left;">NA</td>
+<td style="text-align: left;">NA</td>
+<td style="text-align: left;">NA</td>
+<td style="text-align: left;">NA</td>
+<td style="text-align: left;">NA</td>
+<td style="text-align: left;">00000000</td>
+<td style="text-align: left;">NA</td>
+<td style="text-align: left;">STRAWBERRIES</td>
+<td style="text-align: left;">STRAWBERRIES, ORGANIC - OPERATIONS WITH SALES</td>
+<td style="text-align: left;">ORGANIC STATUS</td>
+<td style="text-align: left;">ORGANIC STATUS: (NOP USDA CERTIFIED)</td>
+<td style="text-align: left;">2</td>
+<td style="text-align: left;">(H)</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">CENSUS</td>
+<td style="text-align: right;">2021</td>
+<td style="text-align: left;">YEAR</td>
+<td style="text-align: left;">NA</td>
+<td style="text-align: left;">STATE</td>
+<td style="text-align: left;">ALASKA</td>
+<td style="text-align: left;">02</td>
+<td style="text-align: left;">NA</td>
+<td style="text-align: left;">NA</td>
+<td style="text-align: left;">NA</td>
+<td style="text-align: left;">NA</td>
+<td style="text-align: left;">NA</td>
+<td style="text-align: left;">NA</td>
+<td style="text-align: left;">00000000</td>
+<td style="text-align: left;">NA</td>
+<td style="text-align: left;">STRAWBERRIES</td>
+<td style="text-align: left;">STRAWBERRIES, ORGANIC - PRODUCTION, MEASURED IN CWT</td>
+<td style="text-align: left;">ORGANIC STATUS</td>
+<td style="text-align: left;">ORGANIC STATUS: (NOP USDA CERTIFIED)</td>
+<td style="text-align: left;">(D)</td>
+<td style="text-align: left;">(D)</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">CENSUS</td>
+<td style="text-align: right;">2021</td>
+<td style="text-align: left;">YEAR</td>
+<td style="text-align: left;">NA</td>
+<td style="text-align: left;">STATE</td>
+<td style="text-align: left;">ALASKA</td>
+<td style="text-align: left;">02</td>
+<td style="text-align: left;">NA</td>
+<td style="text-align: left;">NA</td>
+<td style="text-align: left;">NA</td>
+<td style="text-align: left;">NA</td>
+<td style="text-align: left;">NA</td>
+<td style="text-align: left;">NA</td>
+<td style="text-align: left;">00000000</td>
+<td style="text-align: left;">NA</td>
+<td style="text-align: left;">STRAWBERRIES</td>
+<td style="text-align: left;">STRAWBERRIES, ORGANIC - SALES, MEASURED IN $</td>
+<td style="text-align: left;">ORGANIC STATUS</td>
+<td style="text-align: left;">ORGANIC STATUS: (NOP USDA CERTIFIED)</td>
+<td style="text-align: left;">(D)</td>
+<td style="text-align: left;">(D)</td>
+</tr>
+</tbody>
+</table>
+
+
+</div>
+</div>
+<section id="variables" class="level2">
+<h2 class="anchored" data-anchor-id="variables">Variables</h2>
+<ul>
+<li><p><code>Program</code>: census or survey data</p></li>
+<li><p><code>Year</code>: Year census or survey data was observed between 2016 and 2022</p></li>
+<li><p><code>Period</code>: Calendar year or marketing year. For Prices Received data, refers to an unweighted average (by month) for the calendar year</p></li>
+<li><p><code>State</code>: State in which data was collected</p></li>
+<li><p><code>State ANSI</code>: Code issued by the American National Standards Institute to ensure uniform identification of geographic entities through all federal government agencies</p></li>
+<li><p><code>Data Item</code>: Strawberry item being measured and units of measurement</p></li>
+<li><p><code>Domain</code>: Organic, Chemical, or Fertilizer utilization status of strawberry item</p></li>
+<li><p><code>Domain Category</code>: Organic, Chemical, or Fertilizer status of strawberry item with chemical names and PC codes</p></li>
+<li><p><code>Value</code>: Measurement of data item</p></li>
+<li><p><code>CV %</code>: Coefficient of variation</p></li>
+</ul>
+<p>All other variables (<code>Week Ending</code>, <code>Geo Level</code>, <code>Ag District</code>, <code>Ag District Code</code>, <code>County</code>, <code>County ANSI</code>, <code>Zip Code</code>, <code>Region</code>, <code>watershed_code</code>, <code>Watershed</code>, <code>Commodity</code>) from the original data set are columns with a single value and will be removed from the data set.</p>
+<p>Following the removal of the single value columns, the data set now has 4,314 rows and 10 columns.</p>
+</section>
+<section id="data-exploration-organization-and-cleaning" class="level2">
+<h2 class="anchored" data-anchor-id="data-exploration-organization-and-cleaning">Data Exploration, Organization, and Cleaning</h2>
+<section id="data-types" class="level3">
+<h3 class="anchored" data-anchor-id="data-types">Data Types</h3>
+<p>By observing the preview output of the data set below, we are able to see the data types of all ten variables. We can also see that variables <code>Value</code> and <code>CV %</code> have combinations of numerical data as well as single uppercase character data which represents footnote abbreviations. The interpretation of these abbreviations as well as other term definitions used by the USDA NASS can be found <a href="https://quickstats.nass.usda.gov/src/glossary.pdf">here</a>. Ideally, we want these two variables to be numeric which requires us to change the nonnumerical values to <code>NA</code> and remove commas from numbers.</p>
+<div class="cell">
+<div class="cell-output cell-output-stdout">
+<pre><code>Rows: 4,314
+Columns: 10
+$ Program           &lt;chr&gt; "CENSUS", "CENSUS", "CENSUS", "CENSUS", "CENSUS", "C…
+$ Year              &lt;dbl&gt; 2021, 2021, 2021, 2021, 2021, 2021, 2021, 2021, 2021…
+$ Period            &lt;chr&gt; "YEAR", "YEAR", "YEAR", "YEAR", "YEAR", "YEAR", "YEA…
+$ State             &lt;chr&gt; "ALASKA", "ALASKA", "ALASKA", "ALASKA", "ALASKA", "A…
+$ `State ANSI`      &lt;chr&gt; "02", "02", "02", "02", "02", "02", "02", "06", "06"…
+$ `Data Item`       &lt;chr&gt; "STRAWBERRIES, ORGANIC - OPERATIONS WITH SALES", "ST…
+$ Domain            &lt;chr&gt; "ORGANIC STATUS", "ORGANIC STATUS", "ORGANIC STATUS"…
+$ `Domain Category` &lt;chr&gt; "ORGANIC STATUS: (NOP USDA CERTIFIED)", "ORGANIC STA…
+$ Value             &lt;chr&gt; "2", "(D)", "(D)", "(D)", "2", "(D)", "(D)", "142", …
+$ `CV (%)`          &lt;chr&gt; "(H)", "(D)", "(D)", "(D)", "(H)", "(D)", "(D)", "19…</code></pre>
+</div>
+</div>
+<p>We are able to see the unique footnotes in each of the <code>Value</code> and <code>CV %</code> columns by using the function below.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb2"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a>unique_foot <span class="ot">&lt;-</span> <span class="cf">function</span>(c){</span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">suppressWarnings</span>({</span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a>  xnew <span class="ot">=</span> <span class="fu">as.numeric</span>(<span class="fu">gsub</span>(<span class="st">","</span>, <span class="st">""</span>, c))</span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a>  fns <span class="ot">=</span> <span class="fu">unique</span>(c[<span class="fu">is.na</span>(xnew)])</span>
+<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">return</span>(fns)</span>
+<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a>  })</span>
+<span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a>}</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<div class="cell">
+<div class="cell-output cell-output-stdout">
+<pre><code>Unique footnotes in Values: (D) (NA) (Z) </code></pre>
+</div>
+<div class="cell-output cell-output-stdout">
+<pre><code>Unique footnotes in CV %: (H) (D) NA</code></pre>
+</div>
+</div>
+<p>Again, the definitions of these unique abbreviations can be found on the USDA NASS website. The abbreviations provide the reasoning behind why the data is missing but for the purposes of this analysis, they may all be replaced by NA.</p>
+<p>By building a function, called dcomma, we are able to pass in the columns of <code>Value</code> and <code>CV %</code> and it will return our desired numerical columns with NAs in the footnote cells. As seen below, our last two variables are now doubles as desired.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb5"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a>dcomma <span class="ot">&lt;-</span> <span class="cf">function</span>(c){</span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">suppressWarnings</span>({</span>
+<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a>  xnew <span class="ot">=</span> <span class="fu">as.numeric</span>(<span class="fu">gsub</span>(<span class="st">","</span>, <span class="st">""</span>, c))</span>
+<span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">return</span>(xnew)</span>
+<span id="cb5-5"><a href="#cb5-5" aria-hidden="true" tabindex="-1"></a>  })</span>
+<span id="cb5-6"><a href="#cb5-6" aria-hidden="true" tabindex="-1"></a>}</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<div class="cell">
+<div class="cell-output cell-output-stdout">
+<pre><code>Rows: 4,314
+Columns: 10
+$ Program           &lt;chr&gt; "CENSUS", "CENSUS", "CENSUS", "CENSUS", "CENSUS", "C…
+$ Year              &lt;dbl&gt; 2021, 2021, 2021, 2021, 2021, 2021, 2021, 2021, 2021…
+$ Period            &lt;chr&gt; "YEAR", "YEAR", "YEAR", "YEAR", "YEAR", "YEAR", "YEA…
+$ State             &lt;chr&gt; "ALASKA", "ALASKA", "ALASKA", "ALASKA", "ALASKA", "A…
+$ `State ANSI`      &lt;chr&gt; "02", "02", "02", "02", "02", "02", "02", "06", "06"…
+$ `Data Item`       &lt;chr&gt; "STRAWBERRIES, ORGANIC - OPERATIONS WITH SALES", "ST…
+$ Domain            &lt;chr&gt; "ORGANIC STATUS", "ORGANIC STATUS", "ORGANIC STATUS"…
+$ `Domain Category` &lt;chr&gt; "ORGANIC STATUS: (NOP USDA CERTIFIED)", "ORGANIC STA…
+$ Value             &lt;dbl&gt; 2, NA, NA, NA, 2, NA, NA, 142, 1413251, 311784980, 1…
+$ `CV (%)`          &lt;dbl&gt; NA, NA, NA, NA, NA, NA, NA, 19.2, 51.6, 46.0, 51.7, …</code></pre>
+</div>
+</div>
+</section>
+<section id="nas" class="level3">
+<h3 class="anchored" data-anchor-id="nas">NAs</h3>
+<p>Our next step involves investigating observations that contain <code>NA</code> values. The only three columns that contain <code>NA</code> values are <code>State ANSI</code> as well as <code>Value</code> and <code>CV %</code> from our dcomma function. Those rows that have an <code>NA</code> in the <code>State ANSI</code> column have the value “OTHER STATES” in the <code>State</code> column. Some quick code allows us to find those states that are included in this <code>STATE</code> column and which states fall in the “OTHER STATES” category.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb7"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a>all_states <span class="ot">&lt;-</span> <span class="fu">toupper</span>(state.name)</span>
+<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a><span class="fu">toupper</span>(state.name)[<span class="sc">!</span>(<span class="fu">toupper</span>(state.name) <span class="sc">%in%</span> <span class="fu">unique</span>(strawberry<span class="sc">$</span>State))]</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] "DELAWARE"    "HAWAII"      "MISSISSIPPI" "WYOMING"    </code></pre>
+</div>
+</div>
+<p>Data from all states have been collected except for the four states of Delaware, Hawaii, Mississippi, and Wyoming which will be grouped in the “OTHER STATES” value. As a result of these four states being combined into one value, there is no <code>State ANSI</code> code for this value and the resulting output is <code>NA</code> In this case, no further steps will be taken to deal with these NAs as they are acceptable in the <code>State ANSI</code> column and do not propose any challenges in our future analysis.</p>
+<p>The NAs in the <code>Value</code> and <code>CV %</code> columns were produced from our transformation of the columns into numeric form. Here as well, no further steps will be taken to deal with these NAs as they are acceptable in the <code>Value</code> and <code>CV %</code> columns and do not propose any challenges in our future analysis. Additionally, there are no duplicated rows.</p>
+</section>
+<section id="splitting-census-and-survey" class="level3">
+<h3 class="anchored" data-anchor-id="splitting-census-and-survey">Splitting Census and Survey</h3>
+</section>
+</section>
+</section>
+<section id="exploratory-data-analysis" class="level1">
+<h1>Exploratory Data Analysis</h1>
+<p>When observing the rows of this data set, it can be seen that each row is associated with a state, suggesting that the data is organized by whether the data is census or survey as well as by state. Further exploration shows that the state with the most rows and therefore the state with the most data is California. This makes sense as California is known for being the lead strawberry producing state with its ideal climate.</p>
 </section>
 
 </main>

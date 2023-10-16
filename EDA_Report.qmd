@@ -6,8 +6,242 @@ format: html
 engine: knitr
 ---
 
-## Motivations and Initial Questions
+```{r}
+#| label: Load libraries
+#| warning: false
+#| message: false
+#| echo: false
 
-Are strawberries truly safe to consume? In 2020, the per capita consumption of the most popular berry in the United States, strawberries, was 8.5 pounds. There are many health benefits of consuming strawberries including a healthy immune system from Vitamin C and cell and tissue protection from antioxidant compounds. However, strawberries are also known for being a produce with one of the highest concentration of pesticides. According to the World Health Organization, some pesticides are potentially toxic to humans and may have a negative impact on one's immune or nervous system or may even cause cancer. These facts motivate the question regarding what pesticides are found on strawberries. Of these pesticides, which are the most toxic to humans and which are safe to consume in small quantities? Furthermore, are the use of different pesticides consistent in different states or do they vary by region? These questions all address the concern of whether or not strawberries are really safe to eat.
+library(knitr)  
+library(kableExtra)
+library(tidyverse)
+library(stringr)
+```
 
-## Data Acquisition
+# Motivations and Initial Questions
+
+Are strawberries truly safe to consume? In 2020, the per capita consumption of the most popular berry in the United States, strawberries, was 8.5 pounds. There are many health benefits of consuming strawberries including a healthy immune system from Vitamin C as well as cell and tissue protection from antioxidant compounds. However, strawberries are also known for being a produce with one of the highest concentration of pesticides. According to the World Health Organization, some pesticides are potentially toxic to humans and may have a negative impact on one's immune or nervous system or may even cause cancer. These facts motivate the question regarding what pesticides are found on strawberries. Of these pesticides, which are the most toxic to humans and which are safe to consume in small quantities? Furthermore, are the use of different pesticides consistent in different states or do they vary by region? These questions all address the concern of whether or not strawberries are really safe to eat.
+
+# The Data
+
+To investigate and potentially answer some of these questions, we looked at data from the [United States Department of Agriculture National Agricultural Statistics Service](https://quickstats.nass.usda.gov). The original [downloaded data](https://quickstats.nass.usda.gov/results/45FBC825-B104-38E2-9802-839F5F3C7036) from this source includes census and survey data on the sales, production and price received of strawberry products between the years 2016 and 2022. A glimpse of the original data can be viewed below.
+
+```{r warning=FALSE, message=FALSE}
+#| label: Read and glimpse data 
+#| warning: false
+#| message: false
+#| echo: false
+
+strawberry <- read_csv("strawberry.csv", col_names = TRUE)
+
+knitr::kable(head(strawberry[1:3,]), "html")
+```
+
+## Variables
+
+-   `Program`: census or survey data
+
+-   `Year`: Year census or survey data was observed between 2016 and 2022
+
+-   `Period`: Calendar year or marketing year. For Prices Received data, refers to an unweighted average (by month) for the calendar year
+
+-   `State`: State in which data was collected
+
+-   `State ANSI`: Code issued by the American National Standards Institute to ensure uniform identification of geographic entities through all federal government agencies
+
+-   `Data Item`: Strawberry item being measured and units of measurement
+
+-   `Domain`: Organic, Chemical, or Fertilizer utilization status of strawberry item
+
+-   `Domain Category`: Organic, Chemical, or Fertilizer status of strawberry item with chemical names and PC codes
+
+-   `Value`: Measurement of data item
+
+-   `CV %`: Coefficient of variation
+
+All other variables (`Week Ending`, `Geo Level`, `Ag District`, `Ag District Code`, `County`, `County ANSI`, `Zip Code`, `Region`, `watershed_code`, `Watershed`, `Commodity`) from the original data set are columns with a single value and will be removed from the data set.
+
+```{r}
+#| label: Remove columns with single value
+#| echo: false
+
+## define function
+drop_one_value_col <- function(df){
+col_name <- NULL
+col_val <- NULL
+suppressWarnings({
+for(i in 1:dim(df)[2]){
+if((df |> distinct(df[,i]) |> count()) == 1){
+  col_name = c(col_name, colnames(df[i]))
+  col_val = c(col_val, df[1,i])  
+} }
+})
+
+if(is.null(col_name)){return("No Columns to drop")}else{
+   col_val = unlist(col_val)
+   attributes(col_val) = NULL
+   drp = data.frame(col_name, col_val)
+   return(drp)
+   }
+}
+
+str <- drop_one_value_col(strawberry)
+
+# str |> kable(caption = "Dropped Single-Value Columns: names and values")
+
+str <- str$col_name
+
+strawberry <- strawberry |> select(!all_of(str))
+
+
+
+## applying the function a second time 
+## tests the function when there aren't any 
+## one-value columns
+#####  drop_one_value_col(strawberry)
+
+```
+
+Following the removal of the single value columns, the data set now has 4,314 rows and 10 columns.
+
+## Data Exploration, Organization, and Cleaning
+
+### Data Types
+
+By observing the preview output of the data set below, we are able to see the data types of all ten variables. We can also see that variables `Value` and `CV %` have combinations of numerical data as well as single uppercase character data which represents footnote abbreviations. The interpretation of these abbreviations as well as other term definitions used by the USDA NASS can be found [here](https://quickstats.nass.usda.gov/src/glossary.pdf).  Ideally, we want these two variables to be numeric which requires us to change the nonnumerical values to `NA` and remove commas from numbers.
+
+```{r}
+#| label: observe variable types
+#| echo: false
+
+glimpse(strawberry)
+```
+We are able to see the unique footnotes in each of the `Value` and `CV %` columns by using the function below.  
+
+```{r}
+#| label: unique footnotes function
+#| warning: false
+#| message: false
+#| eval: true
+
+unique_foot <- function(c){
+  suppressWarnings({
+  xnew = as.numeric(gsub(",", "", c))
+  fns = unique(c[is.na(xnew)])
+  return(fns)
+  })
+}
+```
+
+```{r}
+#| label: unique footnotes
+#| warning: false
+#| message: false
+#| echo: false
+#| eval: true
+
+val_foot <- unique_foot(strawberry$Value)
+cv_foot <- unique_foot(strawberry$`CV (%)`)
+
+cat("Unique footnotes in Values:", val_foot, "\n")
+cat("Unique footnotes in CV %:", cv_foot)
+```
+
+Again, the definitions of these unique abbreviations can be found on the USDA NASS website. The abbreviations provide the reasoning behind why the data is missing but for the purposes of this analysis, they may all be replaced by NA. 
+
+By building a function, called dcomma, we are able to pass in the columns of `Value` and `CV %` and it will return our desired numerical columns with NAs in the footnote cells. As seen below, our last two variables are now doubles as desired.
+
+
+```{r}
+dcomma <- function(c){
+  suppressWarnings({
+  xnew = as.numeric(gsub(",", "", c))
+  return(xnew)
+  })
+}
+```
+
+```{r}
+#| label: dcomma function alone
+#| echo: false
+#| warning: false
+#| message: false
+#| eval: true
+
+# officially change value and CV % columns
+strawberry$Value <- dcomma(strawberry$Value)
+strawberry$`CV (%)` <- dcomma(strawberry$`CV (%)`)
+
+glimpse(strawberry)
+```
+
+### NAs
+
+Our next step involves investigating observations that contain `NA` values. The only three columns that contain `NA` values are `State ANSI` as well as `Value` and `CV %` from our dcomma function. Those rows that have an `NA` in the `State ANSI` column have the value "OTHER STATES" in the `State` column. Some quick code allows us to find those states that are included in this `STATE` column and which states fall in the "OTHER STATES" category.
+
+```{r}
+all_states <- toupper(state.name)
+toupper(state.name)[!(toupper(state.name) %in% unique(strawberry$State))]
+```
+
+Data from all states have been collected except for the four states of Delaware, Hawaii, Mississippi, and Wyoming which will be grouped in the "OTHER STATES" value. As a result of these four states being combined into one value, there is no `State ANSI` code for this value and the resulting output is `NA` In this case, no further steps will be taken to deal with these NAs as they are acceptable in the `State ANSI` column and do not propose any challenges in our future analysis.
+
+The NAs in the `Value` and `CV %` columns were produced from our transformation of the columns into numeric form. Here as well, no further steps will be taken to deal with these NAs as they are acceptable in the `Value` and `CV %` columns and do not propose any challenges in our future analysis. Additionally, there are no duplicated rows. 
+
+```{r}
+#| label: Find any NAs or duplicated data
+#| echo: false
+
+# total number of NAs in each row
+# sum(is.na(strawberry$Program))
+# sum(is.na(strawberry$Year))
+# sum(is.na(strawberry$Period))
+# sum(is.na(strawberry$State))
+# sum(is.na(strawberry$`State ANSI`))
+# sum(is.na(strawberry$`Data Item`))
+# sum(is.na(strawberry$Domain))
+# sum(is.na(strawberry$`Domain Category`))
+# sum(is.na(strawberry$Value))
+# sum(is.na(strawberry$`CV (%)`))
+
+#now look at NAs from the rows
+#strawberry[rowSums(is.na(strawberry)) > 0,]
+
+# any duplicated data
+# sum(duplicated(strawberry))
+```
+
+### Splitting Census and Survey
+
+
+
+
+# Exploratory Data Analysis
+
+```{r}
+#| label: Examine rows
+#| echo: false
+
+## is every line associated with a state?
+
+## state_all contains the number of rows containing data 
+## for each of the 47 strawberry-growing states.
+state_all <- strawberry |> group_by(State) |> count()
+
+## test if every row is associated with a state by summing the 
+## counts and testing for equality with the total rows in the 
+## data frame
+
+# if(sum(state_all$n) == dim(strawberry)[1]){print("Every row has value in the State column.")}
+
+```
+
+```{r}
+#| label: Which state has the most rows
+#| echo: false
+
+state_max <- state_all$State[which(state_all$n ==  max(state_all$n)  )]
+
+```
+
+When observing the rows of this data set, it can be seen that each row is associated with a state, suggesting that the data is organized by whether the data is census or survey as well as by state. Further exploration shows that the state with the most rows and therefore the state with the most data is California. This makes sense as California is known for being the lead strawberry producing state with its ideal climate.
