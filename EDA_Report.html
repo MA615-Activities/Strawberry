@@ -7,7 +7,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
 <meta name="author" content="Maysen Pagan">
-<meta name="dcterms.date" content="2023-10-18">
+<meta name="dcterms.date" content="2023-10-23">
 
 <title>Stawberries: Exploratory Data Analysis Report</title>
 <style>
@@ -98,7 +98,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
     <div>
     <div class="quarto-title-meta-heading">Published</div>
     <div class="quarto-title-meta-contents">
-      <p class="date">October 18, 2023</p>
+      <p class="date">October 23, 2023</p>
     </div>
   </div>
   
@@ -108,9 +108,14 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 
 </header>
 
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="http://3.bp.blogspot.com/_Nv3dJG9epgY/TAvuW9DiKaI/AAAAAAAAD5U/5SLJ4tHicUw/s1600/IMG_5245.JPG" width="525" height="340" class="figure-img"></p>
+</figure>
+</div>
 <section id="motivations-and-initial-questions" class="level1">
 <h1>Motivations and Initial Questions</h1>
-<p>Are strawberries truly safe to consume? In 2020, the per capita consumption of the most popular berry in the United States, strawberries, was 8.5 pounds. There are many health benefits of consuming strawberries including a healthy immune system from Vitamin C as well as cell and tissue protection from antioxidant compounds. However, strawberries are also known for being a produce with one of the highest concentration of pesticides. According to the World Health Organization, some pesticides are potentially toxic to humans and may have a negative impact on one’s immune or nervous system or may even cause cancer. These facts motivate the question regarding what pesticides are found on strawberries. Of these pesticides, which are the most toxic to humans and which are safe to consume in small quantities? Furthermore, are the use of different pesticides consistent in different states or do they vary by region? These questions all address the concern of whether or not strawberries are really safe to eat.</p>
+<p>Are strawberries truly safe to consume? In 2020, the per capita consumption of the most popular berry in the United States, strawberries, was 8.5 pounds. There are many health benefits of consuming strawberries including a healthy immune system from Vitamin C as well as cell and tissue protection from antioxidant compounds. However, strawberries are also known for being a produce with one of the concentration of pesticides. According to the World Health Organization, some pesticides are potentially toxic to humans and may have a negative impact on one’s immune or nervous system or may even cause cancer. These facts motivate the question regarding what pesticides are found on strawberries. Of these pesticides, which are the most toxic to humans and which are safe to consume in small quantities? Furthermore, are the use of different pesticides consistent in different states or do they vary by region? These questions all address the concern of whether or not strawberries are really safe to eat.</p>
 </section>
 <section id="the-data" class="level1">
 <h1>The Data</h1>
@@ -317,6 +322,41 @@ $ `CV (%)`          &lt;dbl&gt; NA, NA, NA, NA, NA, NA, NA, 19.2, 51.6, 46.0, 51
 </section>
 <section id="splitting-census-and-survey" class="level3">
 <h3 class="anchored" data-anchor-id="splitting-census-and-survey">Splitting Census and Survey</h3>
+<p>Before beginning the exploratory analysis of the data, we will first split the data set into two subsets: one data set that is census data and one data set that is survey data. This will allow us to closely investigate the marketing, sales, and production data of the strawberries in the census data set and chemical data of the strawberries from the survey data set.</p>
+<section id="census" class="level4">
+<h4 class="anchored" data-anchor-id="census">Census</h4>
+<p>In the census data set, there are two columns that each contain several elements. <code>Domain Category</code> is a column with the singular value “ORGANIC STATUS: (NOP USDA CERTIFIED)” which states that the strawberry product is certified by the National Organic Program. Splitting <code>Data Item</code> into more columns will allow us to look at each element individually and observe what information the element tells us about the strawberry product.</p>
+<p>In this new data set, we have now added a <code>Fruit</code> column which contains the singular value <code>Strawberries</code>, and <code>crop_type</code> which contains the singular value <code>Organic</code>. Additionally, the rest of the <code>Data Item</code> column was split into four new columns: <code>Totals</code>, <code>Fresh Market</code>, <code>Process Market</code>, and <code>Metric</code>. Data under <code>Totals</code> includes the total production and sales of the strawberry product from a specific state and year. Data under <code>Fresh Market</code> includes the sales from the fresh market which includes retail stores, farmers’ markets, or pick-your-own operations. Data under <code>Process Market</code> includes sales from the processed market where strawberries are often frozen before being processed in a final product. The <code>Metric</code> column provides whether or not the production of the strawberries or sale of the strawberries was measured in CWT (hundredweight) or dollars.</p>
+</section>
+<section id="survey" class="level4">
+<h4 class="anchored" data-anchor-id="survey">Survey</h4>
+<p>The survey data will be further split into a data set similar to the census data that provides information on census marketing, sales, and production data as well as another data set that provides information on the chemicals used by strawberry growers.</p>
+<p>The survey market data set now has new columns <code>Totals</code>, <code>Processing, Utilized</code>, <code>Processing</code>, <code>Fresh Market, Utilized</code>, <code>Fresh Market</code>, <code>Utilized</code>, <code>Bearing</code>, and <code>Not Sold</code>. Each column provides the property of the strawberry product to be measured while the new <code>Metric</code> column provides the units of measurement for the property.</p>
+<div class="cell">
+<div class="cell-output cell-output-stderr">
+<pre><code>
+Attaching package: 'jsonlite'</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>The following object is masked from 'package:purrr':
+
+    flatten</code></pre>
+</div>
+</div>
+<div class="cell">
+<div class="cell-output cell-output-stderr">
+<pre><code>New names:
+Rows: 1543 Columns: 3
+── Column specification
+──────────────────────────────────────────────────────── Delimiter: "," chr
+(2): CASCode, cat lgl (1): ...3
+ℹ Use `spec()` to retrieve the full column specification for this data. ℹ
+Specify the column types or set `show_col_types = FALSE` to quiet this message.
+• `` -&gt; `...3`</code></pre>
+</div>
+</div>
+<p>The survey chemical data expands the <code>Domain Category</code> column into the <code>Substance</code>, <code>Chemical Name</code>, and <code>PC Code</code> of the chemical used on the strawberry product. The PC codes of each chemical were matched with their corresponding CAS number in order to determine the hazard level of each chemical. Hazard levels range from extremely hazardous to unlikely to present acute hazard.</p>
+</section>
 </section>
 </section>
 </section>

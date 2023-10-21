@@ -1,7 +1,7 @@
 ---
 title: "Stawberries: Exploratory Data Analysis Report"
 author: Maysen Pagan
-date: 2023 Oct 18
+date: 2023 Oct 23
 format: html
 engine: knitr
 ---
@@ -18,9 +18,11 @@ library(tidyverse)
 library(stringr)
 ```
 
+![](http://3.bp.blogspot.com/_Nv3dJG9epgY/TAvuW9DiKaI/AAAAAAAAD5U/5SLJ4tHicUw/s1600/IMG_5245.JPG){fig-align="center" width="525" height="340"}
+
 # Motivations and Initial Questions
 
-Are strawberries truly safe to consume? In 2020, the per capita consumption of the most popular berry in the United States, strawberries, was 8.5 pounds. There are many health benefits of consuming strawberries including a healthy immune system from Vitamin C as well as cell and tissue protection from antioxidant compounds. However, strawberries are also known for being a produce with one of the highest concentration of pesticides. According to the World Health Organization, some pesticides are potentially toxic to humans and may have a negative impact on one's immune or nervous system or may even cause cancer. These facts motivate the question regarding what pesticides are found on strawberries. Of these pesticides, which are the most toxic to humans and which are safe to consume in small quantities? Furthermore, are the use of different pesticides consistent in different states or do they vary by region? These questions all address the concern of whether or not strawberries are really safe to eat.
+Are strawberries truly safe to consume? In 2020, the per capita consumption of the most popular berry in the United States, strawberries, was 8.5 pounds. There are many health benefits of consuming strawberries including a healthy immune system from Vitamin C as well as cell and tissue protection from antioxidant compounds. However, strawberries are also known for being a produce with one of the concentration of pesticides. According to the World Health Organization, some pesticides are potentially toxic to humans and may have a negative impact on one's immune or nervous system or may even cause cancer. These facts motivate the question regarding what pesticides are found on strawberries. Of these pesticides, which are the most toxic to humans and which are safe to consume in small quantities? Furthermore, are the use of different pesticides consistent in different states or do they vary by region? These questions all address the concern of whether or not strawberries are really safe to eat.
 
 # The Data
 
@@ -108,7 +110,7 @@ Following the removal of the single value columns, the data set now has 4,314 ro
 
 ### Data Types
 
-By observing the preview output of the data set below, we are able to see the data types of all ten variables. We can also see that variables `Value` and `CV %` have combinations of numerical data as well as single uppercase character data which represents footnote abbreviations. The interpretation of these abbreviations as well as other term definitions used by the USDA NASS can be found [here](https://quickstats.nass.usda.gov/src/glossary.pdf).  Ideally, we want these two variables to be numeric which requires us to change the nonnumerical values to `NA` and remove commas from numbers.
+By observing the preview output of the data set below, we are able to see the data types of all ten variables. We can also see that variables `Value` and `CV %` have combinations of numerical data as well as single uppercase character data which represents footnote abbreviations. The interpretation of these abbreviations as well as other term definitions used by the USDA NASS can be found [here](https://quickstats.nass.usda.gov/src/glossary.pdf). Ideally, we want these two variables to be numeric which requires us to change the nonnumerical values to `NA` and remove commas from numbers.
 
 ```{r}
 #| label: observe variable types
@@ -116,7 +118,8 @@ By observing the preview output of the data set below, we are able to see the da
 
 glimpse(strawberry)
 ```
-We are able to see the unique footnotes in each of the `Value` and `CV %` columns by using the function below.  
+
+We are able to see the unique footnotes in each of the `Value` and `CV %` columns by using the function below.
 
 ```{r}
 #| label: unique footnotes function
@@ -147,10 +150,9 @@ cat("Unique footnotes in Values:", val_foot, "\n")
 cat("Unique footnotes in CV %:", cv_foot)
 ```
 
-Again, the definitions of these unique abbreviations can be found on the USDA NASS website. The abbreviations provide the reasoning behind why the data is missing but for the purposes of this analysis, they may all be replaced by NA. 
+Again, the definitions of these unique abbreviations can be found on the USDA NASS website. The abbreviations provide the reasoning behind why the data is missing but for the purposes of this analysis, they may all be replaced by NA.
 
 By building a function, called dcomma, we are able to pass in the columns of `Value` and `CV %` and it will return our desired numerical columns with NAs in the footnote cells. As seen below, our last two variables are now doubles as desired.
-
 
 ```{r}
 dcomma <- function(c){
@@ -186,7 +188,7 @@ toupper(state.name)[!(toupper(state.name) %in% unique(strawberry$State))]
 
 Data from all states have been collected except for the four states of Delaware, Hawaii, Mississippi, and Wyoming which will be grouped in the "OTHER STATES" value. As a result of these four states being combined into one value, there is no `State ANSI` code for this value and the resulting output is `NA` In this case, no further steps will be taken to deal with these NAs as they are acceptable in the `State ANSI` column and do not propose any challenges in our future analysis.
 
-The NAs in the `Value` and `CV %` columns were produced from our transformation of the columns into numeric form. Here as well, no further steps will be taken to deal with these NAs as they are acceptable in the `Value` and `CV %` columns and do not propose any challenges in our future analysis. Additionally, there are no duplicated rows. 
+The NAs in the `Value` and `CV %` columns were produced from our transformation of the columns into numeric form. Here as well, no further steps will be taken to deal with these NAs as they are acceptable in the `Value` and `CV %` columns and do not propose any challenges in our future analysis. Additionally, there are no duplicated rows.
 
 ```{r}
 #| label: Find any NAs or duplicated data
@@ -213,10 +215,456 @@ The NAs in the `Value` and `CV %` columns were produced from our transformation 
 
 ### Splitting Census and Survey
 
+Before beginning the exploratory analysis of the data, we will first split the data set into two subsets: one data set that is census data and one data set that is survey data. This will allow us to closely investigate the marketing, sales, and production data of the strawberries in the census data set and chemical data of the strawberries from the survey data set.
 
+```{r}
+#| label: split srawberry into census and survey
+#| echo: false
+
+census <- strawberry |> filter(Program == "CENSUS")
+survey <- strawberry |> filter(Program == "SURVEY")
+```
+
+#### Census
+
+In the census data set, there are two columns that each contain several elements. `Domain Category` is a column with the singular value "ORGANIC STATUS: (NOP USDA CERTIFIED)" which states that the strawberry product is certified by the National Organic Program. Splitting `Data Item` into more columns will allow us to look at each element individually and observe what information the element tells us about the strawberry product.
+
+```{r}
+#| label: Split Census Data Item
+#| echo: false
+
+## This will be done in stages --
+
+####################################################
+## split `Data Item` into "Fruit", "temp1","temp2","temp3"
+## split the columns until you have columns of 
+## subjects, properties, values, and metrics (where metrics
+## are the units defined for the values)
+
+## In this case, the subject is State/Strawberries -- 
+## strawberries grown reported by state.
+
+  census <- census |>
+  separate_wider_delim(  cols = `Data Item`,
+                         delim = ",",
+                         names = c("Fruit",
+                                 "temp1",
+                                 "temp2",
+                                 "temp3"),
+                         too_many = "error",
+                         too_few = "align_start"
+                       )
+
+############################################
+## split temp1 into crop_type, Prop_acct
+
+census <- census |>
+  separate_wider_delim(  cols = temp1,
+                         delim = " - ",
+                         names = c("crop_type",
+                                 "prop_acct"),
+                         too_many = "error",
+                         too_few = "align_start"
+                       )
+## The column "prop_acct" contains the properties,
+## which are are accounting metrics related to
+## strawberry growing operations.
+## The strings in the "prop_acct" column are row labels
+## for values reported in the "Values" column.  
+
+#trim strings of spaces 
+census$crop_type <- str_trim(census$crop_type, side = "both")
+census$temp2 <- str_trim(census$temp2, side = "both")
+census$temp3 <- str_trim(census$temp3, side = "both")
+
+## make a copy of the temp2 column named `Fresh Market`.
+census <- census |> mutate(`Fresh Market` = temp2, .after = temp2)
+
+## Remove cells in `Fresh Market` column 
+##   that begin "MEASURED"
+census$`Fresh Market` <- census$`Fresh Market` |> str_replace( "^MEA.*", "")
+
+## Remove cells in `Fresh Market` column 
+##   that begin "PROCESSING" 
+census$`Fresh Market` <- census$`Fresh Market` |> str_replace( "^P.*", "")
+
+## substitute a space for NA in `Fresh Market` column
+census$`Fresh Market`[is.na(census$`Fresh Market`)] <- ""  
+
+## in temp2 column, remove cells that begin "FRESH"
+census$temp2 <- census$temp2 |> str_replace("^F.*", "")
+
+## Now fix the entries in the `Fresh Market` column
+##   Remove "FRESH MARKET - " from the cells
+census$`Fresh Market` <- census$`Fresh Market` |> str_replace("^FRESH MARKET - ", "")
+
+## Make a copy of temp2 named `Process Market`
+census <- census |> mutate(`Process Market` = temp2, .after = temp2)
+
+## remove `Process Market` cells beginning "MEASURED"
+census$`Process Market` <-  census$`Process Market` |> str_replace("^MEA.*", "")
+
+## substitute space for NA in `Process Market` column
+census$`Process Market`[is.na(census$`Process Market`)] <- ""
+
+## In temp2, remove cells that begin "PROCESSING"
+census$temp2 <- census$temp2 |> str_replace("^P.*", "")
+
+## In `Processing Market`, remove "PROCESSING - " from cells
+census$`Process Market` <-  census$`Process Market` |> str_replace("PROCESSING - ", "")
+
+## substitute a space for NA in prop_acct column
+census$prop_acct[is.na(census$prop_acct)] <- "" 
+
+## substitute a space for NA in temp2 column
+census$temp2[is.na(census$temp2)] <- "" 
+
+## substitute a space for NA in temp2 column
+census$temp3[is.na(census$temp3)] <- ""
+
+census <- census |> unite(temp2, temp3, col="Metric", sep="")
+
+## Now fix the entries in the Metric column
+##   Remove "MEASURED IN " from the cells
+census$Metric <- census$Metric |> str_replace("MEASURED IN ", "")
+
+## move Metric to the end
+census <- census |> relocate(Metric, .before = Domain)
+
+census <- census |> relocate(`Process Market`, .before = Metric)
+
+census <- census |> rename(Totals = prop_acct)
+```
+
+In this new data set, we have now added a `Fruit` column which contains the singular value `Strawberries`, and `crop_type` which contains the singular value `Organic`. Additionally, the rest of the `Data Item` column was split into four new columns: `Totals`, `Fresh Market`, `Process Market`, and `Metric`. Data under `Totals` includes the total production and sales of the strawberry product from a specific state and year. Data under `Fresh Market` includes the sales from the fresh market which includes retail stores, farmers' markets, or pick-your-own operations. Data under `Process Market` includes sales from the processed market where strawberries are often frozen before being processed in a final product. The `Metric` column provides whether or not the production of the strawberries or sale of the strawberries was measured in CWT (hundredweight) or dollars.
+
+#### Survey
+
+The survey data will be further split into a data set similar to the census data that provides information on census marketing, sales, and production data as well as another data set that provides information on the chemicals used by strawberry growers.
+
+```{r}
+#| label: Split Survey Data Item
+#| echo: false
+survey_market <- survey
+  survey_market <- survey_market |>
+  separate_wider_delim(  cols = `Data Item`,
+                         delim = ", ",
+                         names = c("Fruit",
+                                 "temp1"),
+                         too_many = "merge",
+                         too_few = "align_start"
+                       )
+
+############################################
+## split fruit into fruit, totals
+
+survey_market <- survey_market |>
+  separate_wider_delim(  cols = Fruit,
+                         delim = " - ",
+                         names = c("Fruit",
+                                 "Totals"),
+                         too_many = "error",
+                         too_few = "align_start"
+                       )
+## make a copy of the temp1 column named `Not Sold`.
+survey_market <- survey_market |> mutate(`Not Sold` = temp1, .after = temp1)
+
+#keep only cells that start with NOT SOLD
+survey_market$`Not Sold` <- survey_market$`Not Sold` %>%  str_extract( "^NOT.*")
+  
+## in temp1 column, remove cells that begin "NOT SOLD"
+survey_market$temp1<- survey_market$temp1 |> str_replace("^NOT.*", "")
+
+## substitute a space for NA in `Fresh Market` column
+survey_market$`Not Sold`[is.na(survey_market$`Not Sold`)] <- ""  
+
+##Remove "NOT SOLD - " from the cells
+survey_market$`Not Sold` <- survey_market$`Not Sold` |> str_replace("^NOT SOLD - ", "")
+
+
+
+## make a copy of the temp1 column named `Bearing`.
+survey_market <- survey_market |> mutate(`Bearing` = temp1, .after = temp1)
+
+#keep only cells that start with Bearing
+survey_market$`Bearing` <- survey_market$`Bearing` %>%  str_extract( "^BEAR.*")
+  
+## in temp1 column, remove cells that begin "Bearing"
+survey_market$temp1<- survey_market$temp1 |> str_replace("^BEAR.*", "")
+
+## substitute a space for NA in `Bearing` column
+survey_market$`Bearing`[is.na(survey_market$`Bearing`)] <- ""  
+
+##Remove "Bearing - " from the cells
+survey_market$`Bearing` <- survey_market$`Bearing` |> str_replace("^BEARING - ", "")
+
+
+
+## make a copy of the temp1 column named `Utilized`.
+survey_market <- survey_market |> mutate(`Utilized` = temp1, .after = temp1)
+
+#keep only cells that start with Utilized
+survey_market$`Utilized` <- survey_market$`Utilized` %>%  str_extract( "^UTIL.*")
+  
+## in temp1 column, remove cells that begin "Utilized"
+survey_market$temp1<- survey_market$temp1 |> str_replace("^UTIL.*", "")
+
+## substitute a space for NA in `Utilized` column
+survey_market$`Utilized`[is.na(survey_market$`Utilized`)] <- ""  
+
+##Remove "Utilized - " from the cells
+survey_market$`Utilized` <- survey_market$`Utilized` |> str_replace("^UTILIZED - ", "")
+
+
+
+
+## make a copy of the temp1 column named `Fresh Market`.
+survey_market <- survey_market |> mutate(`Fresh Market` = temp1, .after = temp1)
+
+#keep only cells that start with Fresh Market
+survey_market$`Fresh Market` <- survey_market$`Fresh Market` %>%  str_extract( "^FRESH MARKET .*")
+  
+## in temp1 column, remove cells that begin "Fresh Market"
+survey_market$temp1<- survey_market$temp1 |> str_replace("^FRESH MARKET .*", "")
+
+## substitute a space for NA in `Fresh Market` column
+survey_market$`Fresh Market`[is.na(survey_market$`Fresh Market`)] <- ""  
+
+##Remove "Fresh Market - " from the cells
+survey_market$`Fresh Market` <- survey_market$`Fresh Market` |> str_replace("^FRESH MARKET - ", "")
+
+
+
+## make a copy of the temp1 column named `Fresh Market, Utilized`.
+survey_market <- survey_market |> mutate(`Fresh Market, Utilized` = temp1, .after = temp1)
+
+#keep only cells that start with Fresh Market, Utilized
+survey_market$`Fresh Market, Utilized` <- survey_market$`Fresh Market, Utilized` %>%  str_extract( "^FRESH MARKET,.*")
+  
+## in temp1 column, remove cells that begin "Fresh Market, Utilized"
+survey_market$temp1<- survey_market$temp1 |> str_replace("^FRESH MARKET,.*", "")
+
+## substitute a space for NA in `Fresh Market, Utilized` column
+survey_market$`Fresh Market, Utilized`[is.na(survey_market$`Fresh Market, Utilized`)] <- ""  
+
+##Remove "Fresh Market, Utilized - " from the cells
+survey_market$`Fresh Market, Utilized` <- survey_market$`Fresh Market, Utilized` |> str_replace("^FRESH MARKET, UTILIZED - ", "")
+
+
+
+## make a copy of the temp1 column named `Processing`.
+survey_market <- survey_market |> mutate(`Processing` = temp1, .after = temp1)
+
+#keep only cells that start with Processing
+survey_market$`Processing` <- survey_market$`Processing` %>%  str_extract( "^PROCESSING .*")
+  
+## in temp1 column, remove cells that begin "Processing"
+survey_market$temp1<- survey_market$temp1 |> str_replace("^PROCESSING .*", "")
+
+## substitute a space for NA in `Processing` column
+survey_market$`Processing`[is.na(survey_market$`Processing`)] <- ""  
+
+##Remove "Processing - " from the cells
+survey_market$`Processing` <- survey_market$`Processing` |> str_replace("^PROCESSING - ", "")
+
+
+
+## make a copy of the temp1 column named `Processing, Utilized`.
+survey_market <- survey_market |> mutate(`Processing, Utilized` = temp1, .after = temp1)
+
+#keep only cells that start with Processing, Utilized
+survey_market$`Processing, Utilized` <- survey_market$`Processing, Utilized` %>%  str_extract( "^PROCESSING,.*")
+  
+## in temp1 column, remove cells that begin "Processing, Utilized"
+survey_market$temp1<- survey_market$temp1 |> str_replace("^PROCESSING,.*", "")
+
+## substitute a space for NA in `Processing, Utilized` column
+survey_market$`Processing, Utilized`[is.na(survey_market$`Processing, Utilized`)] <- ""  
+
+##Remove "Processing, Utilized - " from the cells
+survey_market$`Processing, Utilized` <- survey_market$`Processing, Utilized` |> str_replace("^PROCESSING, UTILIZED - ", "")
+
+
+#split columns by ", " to separate out metrics
+survey_market <- survey_market |>
+  separate_wider_delim(  cols = `Processing, Utilized`,
+                         delim = ", ",
+                         names = c("Processing, Utilized",
+                                 "temp2"),
+                         too_many = "error",
+                         too_few = "align_start"
+                       )
+survey_market$temp2[is.na(survey_market$temp2)] <- ""  
+survey_market <- survey_market |>
+  separate_wider_delim(  cols = `Processing`,
+                         delim = ", ",
+                         names = c("Processing",
+                                 "temp3"),
+                         too_many = "error",
+                         too_few = "align_start"
+                       )
+survey_market$temp3[is.na(survey_market$temp3)] <- ""  
+survey_market <- survey_market |>
+  separate_wider_delim(  cols = `Fresh Market, Utilized`,
+                         delim = ", ",
+                         names = c("Fresh Market, Utilized",
+                                 "temp4"),
+                         too_many = "error",
+                         too_few = "align_start"
+                       )
+survey_market$temp4[is.na(survey_market$temp4)] <- ""  
+survey_market <- survey_market |>
+  separate_wider_delim(  cols = `Fresh Market`,
+                         delim = ", ",
+                         names = c("Fresh Market",
+                                 "temp5"),
+                         too_many = "error",
+                         too_few = "align_start"
+                       )
+survey_market$temp5[is.na(survey_market$temp5)] <- ""  
+survey_market <- survey_market |>
+  separate_wider_delim(  cols = Utilized,
+                         delim = ", ",
+                         names = c("Utilized",
+                                 "temp6"),
+                         too_many = "error",
+                         too_few = "align_start"
+                       )
+survey_market$temp6[is.na(survey_market$temp6)] <- ""  
+survey_market <- survey_market |>
+  separate_wider_delim(  cols = Bearing,
+                         delim = ", ",
+                         names = c("Bearing",
+                                 "temp7"),
+                         too_many = "merge",
+                         too_few = "align_start"
+                       )
+survey_market$temp7[is.na(survey_market$temp7)] <- ""  
+survey_market <- survey_market |>
+  separate_wider_delim(  cols = `Not Sold`,
+                         delim = ", ",
+                         names = c("Not Sold",
+                                 "temp8"),
+                         too_many = "merge",
+                         too_few = "align_start"
+                       )
+survey_market$temp8[is.na(survey_market$temp8)] <- ""  
+survey_market <- survey_market |> unite(temp1, temp2, col="Metric", sep="")
+survey_market <- survey_market |> unite(Metric, temp3, col="Metric", sep="")
+survey_market <- survey_market |> unite(Metric, temp4, col="Metric", sep="")
+survey_market <- survey_market |> unite(Metric, temp5, col="Metric", sep="")
+survey_market <- survey_market |> unite(Metric, temp6, col="Metric", sep="")
+survey_market <- survey_market |> unite(Metric, temp7, col="Metric", sep="")
+survey_market <- survey_market |> unite(Metric, temp8, col="Metric", sep="")
+survey_market$Totals[is.na(survey_market$Totals)] <- ""  
+
+## Now fix the entries in the Metric column
+##   Remove "MEASURED IN " from the cells
+survey_market$Metric <- survey_market$Metric |> str_replace("MEASURED IN ", "")
+
+## move Metric to the end
+survey_market <- survey_market |> relocate(Metric, .before = Domain)
+
+```
+
+The survey market data set now has new columns `Totals`, `Processing, Utilized`, `Processing`, `Fresh Market, Utilized`, `Fresh Market`, `Utilized`, `Bearing`, and `Not Sold`. Each column provides the property of the strawberry product to be measured while the new `Metric` column provides the units of measurement for the property.
+
+```{r}
+#| label: Organize Survey chemical
+#| echo: false
+survey_chemical <- survey
+
+#split Domain Category into Substance and Chemical Name
+survey_chemical <- separate_wider_delim(survey_chemical, `Domain Category`, 
+                                        delim = ": ", 
+                                        names = c("Substance", "Chemical Name"), 
+                                        too_many = "error", 
+                                        too_few = "align_start")
+
+#get rid of parentheses in Chemical Name
+survey_chemical$`Chemical Name` <- str_replace(survey_chemical$`Chemical Name`, "\\(", "")
+survey_chemical$`Chemical Name` <- str_replace(survey_chemical$`Chemical Name`, "\\)", "")
+
+#separate chemical name into chemical name and pc code
+survey_chemical <- separate_wider_delim(survey_chemical, `Chemical Name`, 
+                                  delim = " = ", 
+                                  names = c("Chemical Name", "PC Code"),
+                                  too_many = "error",
+                                  too_few = "align_start")
+
+survey_chemical <- separate_wider_delim(survey_chemical, Substance, 
+                                  delim = ", ", 
+                                  names = c("Substance", "Chemical"),
+                                  too_many = "error",
+                                  too_few = "align_start")
+
+#PC Codes to CAS codes
+library(stringr)
+library(httr)
+library(jsonlite)
+
+pc_codes <- unique(subset(survey_chemical$`PC Code`, !is.na(survey_chemical$`PC Code`)))
+pc_codes <- str_replace(pc_codes, "\\)", "")
+
+survey_chemical$`PC Code` <- ifelse(survey_chemical$`PC Code`=="29088)", "29088", survey_chemical$`PC Code`)
+
+cas_codes <- c()
+for (i in 1:length(pc_codes)){
+  path <- paste0("https://ordspub.epa.gov/ords/pesticides/apprilapi/?q=%7b%22ais%22:%7b%22$instr%22:%22",
+               pc_codes[i],
+               "%22%7d%7d")
+  r <- GET(url = path)
+  r_text <- content(r, as = "text", encoding = "UTF-8")
+  df <- fromJSON(r_text,flatten = TRUE)
+  df2 <- df$items
+  important <- str_extract(df2$ais, "\\([^()]+\\)")
+  imp <- str_replace(gsub("[\\(\\)]", "", regmatches(important, gregexpr("\\/.*?\\)",
+                     text = important)))[1], "/", '')
+  cas_codes <- c(cas_codes, imp)
+}
+
+cas_codes <- str_replace(cas_codes, "character0", "")
+conversion <- as.matrix(cbind(pc_codes, cas_codes))
+colnames(conversion)[1] <- "PC Code"
+conversion <- rbind(c(NA, NA), conversion)
+survey_chemical <- merge(survey_chemical, conversion, by.x='PC Code', by.y='PC Code')
+colnames(survey_chemical)[14] <- "CAS Code"
+survey_chemical <- survey_chemical |> relocate(`PC Code`, .before = Value)
+survey_chemical <- survey_chemical |> relocate(`CAS Code`, .before = Value)
+survey_chemical$`CAS Code`<- ifelse(survey_chemical$`PC Code` == "12701", "5902-51-2", survey_chemical$`CAS Code`)
+
+```
+
+```{r}
+#| label: Add hazard levels
+#| echo: false
+#hazard levels
+hazard <- read_csv("hazard.csv")
+hazard <- hazard %>% select(-3)
+hazard <- na.omit(hazard)
+hazard$hazard_level <- ifelse(hazard$cat == "Ia" | hazard$cat == "1a", "extremely hazardous", NA)
+hazard$hazard_level <- ifelse(hazard$cat == "Ib" | hazard$cat == "1b", "highly hazardous", hazard$hazard_level)
+hazard$hazard_level <- ifelse(hazard$cat == "II", "moderately hazardous", hazard$hazard_level)
+hazard$hazard_level <- ifelse(hazard$cat == "III", "slightly hazardous", hazard$hazard_level)
+hazard$hazard_level <- ifelse(hazard$cat == "U", "unlikely to present acute hazard", hazard$hazard_level)
+hazard$hazard_level <- ifelse(hazard$cat == "FM", "fumigant, not classified", hazard$hazard_level)
+hazard$hazard_level <- ifelse(hazard$cat == "O" | hazard$cat == "o", "obsolete as pesticide, not classified", hazard$hazard_level)
+colnames(hazard)[1] <- "CAS Code"
+survey_chemical <- left_join(survey_chemical, hazard, by = "CAS Code")
+survey_chemical <- survey_chemical %>% select(-15)
+survey_chemical$hazard_level[is.na(survey_chemical$hazard_level)] <- ""  
+colnames(survey_chemical)[15] <- "Hazard Level"
+```
+The survey chemical data expands the `Domain Category` column into the `Substance`, `Chemical Name`, and `PC Code` of the chemical used on the strawberry product. The PC codes of each chemical were matched with their corresponding CAS number in order to determine the hazard level of each chemical. Hazard levels range from extremely hazardous to unlikely to present acute hazard.
 
 
 # Exploratory Data Analysis
+
+
+
+
+
+
 
 ```{r}
 #| label: Examine rows
