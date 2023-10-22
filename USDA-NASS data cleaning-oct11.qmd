@@ -724,7 +724,7 @@ Once the data has been cleaned and organized, you must conduct your own EDA. Be 
 <!-- ## Clean and organize strwb_survey -->
 
 ```{r}
-chemicals <- separate_wider_delim(strwb_survey, "Domain Category", delim = ": ", names = c("cide", "chemical"), too_few = "align_start")
+chemicals <- separate_wider_delim(strwb_survey, "Domain Category", delim = ": ", names = c("cide", "chemical"), too_many = "error", too_few = "align_start")
 
 
 chemicals <- chemicals %>% select(-2)

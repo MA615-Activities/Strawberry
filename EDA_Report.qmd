@@ -572,6 +572,7 @@ The survey market data set now has new columns `Totals`, `Processing, Utilized`,
 ```{r}
 #| label: Organize Survey chemical
 #| echo: false
+#| message: false
 survey_chemical <- survey
 
 #split Domain Category into Substance and Chemical Name
@@ -660,36 +661,54 @@ The survey chemical data expands the `Domain Category` column into the `Substanc
 
 # Exploratory Data Analysis
 
-
-
-
-
-
-
+## California Strawberry Production
 ```{r}
-#| label: Examine rows
+#| label: Where are most strawberries produced and where are they going
 #| echo: false
+library(esquisse)
 
-## is every line associated with a state?
-
-## state_all contains the number of rows containing data 
-## for each of the 47 strawberry-growing states.
+#if(sum(state_all$n) == dim(strawberry)[1]){print("Every row has value in the State column.")}
 state_all <- strawberry |> group_by(State) |> count()
-
-## test if every row is associated with a state by summing the 
-## counts and testing for equality with the total rows in the 
-## data frame
-
-# if(sum(state_all$n) == dim(strawberry)[1]){print("Every row has value in the State column.")}
-
+state_max <- state_all$State[which(state_all$n ==  max(state_all$n)  )]
 ```
+
+When observing the rows of the larger strawberry data set, it can be seen that each row is associated with a state, suggesting that the data is organized by whether the data is census or survey as well as by state. Further exploration shows that the state with the most rows and therefore the state with the most data on strawberries is California. This result makes sense as California is known for being the lead strawberry producing state with its ideal climate.
 
 ```{r}
-#| label: Which state has the most rows
+#| label: fig-CAFL
+#| fig-cap: "Strawberry Production ($) in California and Florida"
 #| echo: false
 
-state_max <- state_all$State[which(state_all$n ==  max(state_all$n)  )]
+# california production in $ from 2016-2022
+cali_flo_prod <- survey_market %>% filter(State == "CALIFORNIA" | State == "FLORIDA", Metric == "$", Totals == "PRODUCTION", Period == "YEAR")
 
+ggplot(cali_flo_prod) +
+  aes(x = Year, y = Value/100000, colour = State) +
+  geom_point() +
+  geom_line(lwd = 0.8) +
+  scale_color_brewer(palette = "Set2", direction = 1) +
+  labs(
+    x = "Year",
+    y = "Thousands of Dollars",
+    title = "Strawberry Dollar Production 2016-2022",
+    subtitle = "Comparing California and Florida"
+  ) +
+  theme_bw() +
+  theme(axis.text = element_text(size = 12),
+        axis.title = element_text(size = 13),
+        plot.title = element_text(size = 14))
+```
+Since strawberries are produced more in California than any other state, we first look at the value of all strawberries produced in California and compare to the value of all strawberries produced in Florida, which is the state that produces the second most strawberries. @fig-CAFL shows California's produced strawberries valued at over \$2 billion each year from 2016 to 2022. The next largest strawberry producing state produced over \$1 billion less worth of strawberries each year. 
+
+## Fresh Market vs Process Market
+
+```{r}
+#census sales from fresh market and process market
+cen_sales <- census %>% filter(`Fresh Market` == "SALES" | `Process Market` == "SALES", Metric == "$")
+cen_sales %>% filter(`Fresh Market`== "SALES")
 ```
 
-When observing the rows of this data set, it can be seen that each row is associated with a state, suggesting that the data is organized by whether the data is census or survey as well as by state. Further exploration shows that the state with the most rows and therefore the state with the most data is California. This makes sense as California is known for being the lead strawberry producing state with its ideal climate.
+
+## Chemicals By State
+
+
