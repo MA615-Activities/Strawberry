@@ -351,6 +351,8 @@ Specify the column types or set `show_col_types = FALSE` to quiet this message.
 </section>
 <section id="exploratory-data-analysis" class="level1">
 <h1>Exploratory Data Analysis</h1>
+<section id="california-strawberry-production" class="level2">
+<h2 class="anchored" data-anchor-id="california-strawberry-production">California Strawberry Production</h2>
 <p>When observing the rows of the larger strawberry data set, it can be seen that each row is associated with a state, suggesting that the data is organized by whether the data is census or survey as well as by state. Further exploration shows that the state with the most rows and therefore the state with the most data on strawberries is California. This result makes sense as California is known for being the lead strawberry producing state with its ideal climate.</p>
 <div class="cell">
 <div class="cell-output-display">
@@ -363,6 +365,43 @@ Specify the column types or set `show_col_types = FALSE` to quiet this message.
 </div>
 </div>
 <p>Since strawberries are produced more in California than any other state, we first look at the value of all strawberries produced in California and compare to the value of all strawberries produced in Florida, which is the state that produces the second most strawberries. <a href="#fig-CAFL">Figure&nbsp;1</a> shows California’s produced strawberries valued at over $2 billion each year from 2016 to 2022. The next largest strawberry producing state produced over $1 billion less worth of strawberries each year.</p>
+</section>
+<section id="fresh-market-vs-process-market" class="level2">
+<h2 class="anchored" data-anchor-id="fresh-market-vs-process-market">Fresh Market vs Process Market</h2>
+<div class="cell">
+<div class="cell-output-display">
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="EDA_Report_files/figure-html/Fresh%20Market%20Ops-1.png" class="img-fluid figure-img" width="672"></p>
+<figcaption class="figure-caption">Fresh Market Sales Operations per Census Year</figcaption>
+</figure>
+</div>
+</div>
+</div>
+<div class="cell">
+<div class="cell-output-display">
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="EDA_Report_files/figure-html/Process%20Market%20Ops-1.png" class="img-fluid figure-img" width="672"></p>
+<figcaption class="figure-caption">Process Market Sales Operations per Census Year</figcaption>
+</figure>
+</div>
+</div>
+</div>
+</section>
+<section id="chemicals-by-state" class="level2">
+<h2 class="anchored" data-anchor-id="chemicals-by-state">Chemicals By State</h2>
+<div class="cell">
+<div class="cell-output-display">
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="EDA_Report_files/figure-html/Chemicals%20at%20each%20haz%20level-1.png" class="img-fluid figure-img" width="672"></p>
+<figcaption class="figure-caption">Number of Unique Hazardous Chemicals Used in 2016, 2018, 2019, and 2021</figcaption>
+</figure>
+</div>
+</div>
+</div>
+</section>
 </section>
 
 </main>

@@ -16,6 +16,7 @@ library(knitr)
 library(kableExtra)
 library(tidyverse)
 library(stringr)
+library(gridExtra)
 ```
 
 ![](http://3.bp.blogspot.com/_Nv3dJG9epgY/TAvuW9DiKaI/AAAAAAAAD5U/5SLJ4tHicUw/s1600/IMG_5245.JPG){fig-align="center" width="525" height="340"}
@@ -344,6 +345,7 @@ The survey data will be further split into a data set similar to the census data
 
 ```{r}
 #| label: Split Survey Data Item
+#| message: false
 #| echo: false
 survey_market <- survey
   survey_market <- survey_market |>
@@ -703,12 +705,114 @@ Since strawberries are produced more in California than any other state, we firs
 ## Fresh Market vs Process Market
 
 ```{r}
+#| label: Census Sales
+#| echo: false
+cen_sales <- census %>% filter(`Fresh Market` == "OPERATIONS WITH SALES" | `Process Market` == "OPERATIONS WITH SALES")
+# 
+# cen_sales2 <- cen_sales
+# cen_sales2$Year <- as.factor(cen_sales2$Year)
+# sd <- as.matrix((cen_sales2 %>% group_by(Year) %>% summarize(sd = sd(Value)))[,2])
+# mean <- as.matrix((cen_sales2 %>% group_by(Year) %>% summarize(mean = mean(Value)))[,2])
+# lb <- c(0, 0, 0)
+# ub <- c(mean+sd)
+# 
+# cen_sales2 %>%  ggplot(aes(Year, Value)) +
+#   geom_point(position = "jitter") +
+#   geom_point()
+```
+
+
+```{r}
+#| label: fig-fresh_ops
+#| fig-cap: "Fresh Market Sales Operations per Census Year"
+#| message: false
+#| echo: false
 #census sales from fresh market and process market
-cen_sales <- census %>% filter(`Fresh Market` == "SALES" | `Process Market` == "SALES", Metric == "$")
-cen_sales %>% filter(`Fresh Market`== "SALES")
+
+#top five states with most fresh market operations with sales over all 7 years
+# five_fresh <- (cen_sales %>% filter(`Fresh Market` == "OPERATIONS WITH SALES") %>% group_by(State) %>% summarize(total_ops = sum(Value)) %>% arrange(desc(total_ops)) %>% select(State))[1:5,]
+# five_processed <- (cen_sales %>% filter(`Process Market` == "OPERATIONS WITH SALES") %>% group_by(State) %>% summarize(total_ops = sum(Value)) %>% arrange(desc(total_ops)) %>% select(State))[1:5,]
+five_fresh <- c("CALIFORNIA", "WASHINGTON", "NEW YORK", "VERMONT", "WISCONSIN")
+five_processed <- c("CALIFORNIA", "WASHINGTON", "OREGON", "NEW YORK", "MARYLAND")
+
+
+fresh_sales <- cen_sales %>% filter(`Fresh Market` == "OPERATIONS WITH SALES", State %in% five_fresh) %>% group_by(State, Year) %>% summarize(total_ops = sum(Value)) %>% arrange(desc(total_ops))
+process_sales <- cen_sales %>% filter(`Process Market` == "OPERATIONS WITH SALES", State %in% five_processed) %>% group_by(State, Year) %>% summarize(total_ops = sum(Value)) %>% arrange(desc(total_ops))
+
+
+ggplot(fresh_sales) +
+  aes(x = Year, y = total_ops, colour = State) +
+  geom_point() +
+  geom_line(lwd = 0.8) +
+  scale_color_brewer(palette = "Set2", direction = 1) +
+  labs(
+    x = "Year",
+    y = "Operations with Sales",
+    title = "Census Fresh Market Operations with Sales ",
+    subtitle = "for top 5 fresh market operations states"
+  ) +
+  theme_bw() +
+  theme(axis.text = element_text(size = 12),
+        axis.title = element_text(size = 13),
+        plot.title = element_text(size = 14))
+```
+
+```{r}
+#| label: label: fig-process_ops
+#| fig-cap: "Process Market Sales Operations per Census Year"
+#| message: false
+#| echo: false
+
+ggplot(process_sales ) +
+  aes(x = Year, y = total_ops, colour = State) +
+  geom_point() +
+  geom_line(lwd = 0.8) +
+  scale_color_brewer(palette = "Set2", direction = 1) +
+  labs(
+    x = "Year",
+    y = "Operations with Sales",
+    title = "Census Process Market Operations with Sales ",
+    subtitle = "for top 5 process market operations states"
+  ) +
+  theme_bw() +
+  theme(axis.text = element_text(size = 12),
+        axis.title = element_text(size = 13),
+        plot.title = element_text(size = 14))
+
 ```
 
 
 ## Chemicals By State
+
+```{r}
+#| label: fig-haz_chems_used
+#| fig-cap: "Number of Unique Hazardous Chemicals Used in 2016, 2018, 2019, and 2021"
+#| message: false
+#| echo: false
+
+#number of hazardous chemicals used by each state in each year
+usage <- left_join(unique(survey_chemical[c("Year","State","CAS Code")]), hazard, by = "CAS Code") %>% select(-4) %>% filter(!is.na(hazard_level))
+usage <- usage %>% group_by(Year, State, hazard_level) %>% summarize(num_used = n())
+
+usage$hazard_level <- str_replace(usage$hazard_level, " hazardous", "")
+usage$hazard_level <- str_replace(usage$hazard_level, "unlikely to present acute hazard", "unlikely")
+usage$hazard_level <- str_replace(usage$hazard_level, "fumigant, not classified", "not classified")
+
+order <- c("highly", "moderately", "slightly", "unlikely", "not classified")
+
+usage %>% ggplot(aes(hazard_level, num_used, fill = State)) +
+  geom_bar(stat = 'identity', position = position_dodge2(preserve = "single")) + 
+  scale_x_discrete(limits = order, guide = guide_axis(n.dodge=2)) +
+  facet_wrap(~Year) +
+  scale_fill_brewer(palette = "Set2", direction = 1) +
+  labs(x = "Hazard Level",
+       y = "Number of Chemicals",
+       title = "Number of Chemicals Used at Each Hazard Level") +
+  theme(axis.text = element_text(size = 10),
+        axis.title = element_text(size = 13),
+        plot.title = element_text(size = 14)) +
+  theme_bw()
+  
+```
 
 
