@@ -368,39 +368,46 @@ Specify the column types or set `show_col_types = FALSE` to quiet this message.
 </section>
 <section id="fresh-market-vs-process-market" class="level2">
 <h2 class="anchored" data-anchor-id="fresh-market-vs-process-market">Fresh Market vs Process Market</h2>
+<p>From the above results, we see that California is the state that produces strawberries more than any other state. But what kinds of markets are these strawberries being sold to? The census data was observed to determine the rank of states with the most Operations with Sales to fresh markets. The top fives states were, California, Washington, New York, Vermont, and Wisconsin. Similarly, the top five states with the most Operations with Sales to process markets were California, Washington, Oregon, New York, and Maryland. The five states in each group will be analyzed in the graphs below.</p>
 <div class="cell">
 <div class="cell-output-display">
-<div class="quarto-figure quarto-figure-center">
+<div id="fig-fresh_ops" class="quarto-figure quarto-figure-center anchored">
 <figure class="figure">
-<p><img src="EDA_Report_files/figure-html/Fresh%20Market%20Ops-1.png" class="img-fluid figure-img" width="672"></p>
-<figcaption class="figure-caption">Fresh Market Sales Operations per Census Year</figcaption>
+<p><img src="EDA_Report_files/figure-html/fig-fresh_ops-1.png" class="img-fluid figure-img" width="672"></p>
+<figcaption class="figure-caption">Figure&nbsp;2: Fresh Market Sales Operations per Census Year</figcaption>
 </figure>
 </div>
 </div>
 </div>
+<p><a href="#fig-fresh_ops">Figure&nbsp;2</a> shows each state’s number of operations with sales in each of the 2016, 2019, and 2021 census years. The lead strawberry producing state is also the state selling the most strawberries to fresh markets. Although Florida was the second state with the largest dollar production of strawberries, they did not make either top five list of number of operations with sales to the fresh market or process market. It is interesting to note that in the 2016 census year, Wisconsin had more operations with sales to the fresh market than Vermont and New York. But between 2016 and the next census year of 2019, Wisconsin dropped the number of operations with sales to below that of Vermont and New York, while New York surpassed Vermont and Washington.</p>
 <div class="cell">
 <div class="cell-output-display">
-<div class="quarto-figure quarto-figure-center">
+<div id="fig-process_ops" class="quarto-figure quarto-figure-center anchored">
 <figure class="figure">
-<p><img src="EDA_Report_files/figure-html/Process%20Market%20Ops-1.png" class="img-fluid figure-img" width="672"></p>
-<figcaption class="figure-caption">Process Market Sales Operations per Census Year</figcaption>
+<p><img src="EDA_Report_files/figure-html/fig-process_ops-1.png" class="img-fluid figure-img" width="672"></p>
+<figcaption class="figure-caption">Figure&nbsp;3: Process Market Sales Operations per Census Year</figcaption>
 </figure>
 </div>
 </div>
 </div>
+<p>When observing the top five states with the most operations with sales to the proces market, <a href="#fig-process_ops">Figure&nbsp;3</a> demonstrates that the rankings stay relatively the same over the three census years. There was no data available for Oregon in 2021.</p>
 </section>
 <section id="chemicals-by-state" class="level2">
 <h2 class="anchored" data-anchor-id="chemicals-by-state">Chemicals By State</h2>
+<p>To answer our initial question of whether or not strawberries are truly safe to eat, we will look at the survey chemical data set. Which states are using which kinds of chemicals and what are the hazard levels of these chemicals?</p>
 <div class="cell">
 <div class="cell-output-display">
-<div class="quarto-figure quarto-figure-center">
+<div id="fig-haz_chems_used" class="quarto-figure quarto-figure-center anchored">
 <figure class="figure">
-<p><img src="EDA_Report_files/figure-html/Chemicals%20at%20each%20haz%20level-1.png" class="img-fluid figure-img" width="672"></p>
-<figcaption class="figure-caption">Number of Unique Hazardous Chemicals Used in 2016, 2018, 2019, and 2021</figcaption>
+<p><img src="EDA_Report_files/figure-html/fig-haz_chems_used-1.png" class="img-fluid figure-img" width="672"></p>
+<figcaption class="figure-caption">Figure&nbsp;4: Number of Unique Hazardous Chemicals Used in 2016, 2018, 2019, and 2021</figcaption>
 </figure>
 </div>
 </div>
 </div>
+<p>A data frame was created from the survey chemical data that contains the number of unique chemicals used in each hazard level by each state per year. For example, in the year 2016, California used 14 different chemicals that had a hazardous level of moderately hazardous. Data for this analysis was only available for California, Florida, Oregon, and Washington in the year of 2016 and only available for California and Florida in 2018, 2019, nd 2021.<br>
+<a href="#fig-haz_chems_used">Figure&nbsp;4</a> shows that in 2016, California, Florida, and Washington all used one highly hazardous chemical. The available data also shows that California and Florida used a highly hazardous chemical in 2018, 2019, and 2021. This chemical was the same highly hazardous chemical used in all years: Abamectin. Human intoxication of Abamectin is often not reported but in large doses it can potentially be a fatal cause of pesticide poisoning. An <a href="https://www.ncbi.nlm.nih.gov/pmc/articles/PMC4413419/">experiment</a> was conducted in which a subject was intoxicated with 3600 milligrams of abamectin orally. Symptoms included an oral scent of poison, drowsiness, low blood pressure, increased heart rate, and rash. The subject was treated and was discharged two days later in good condition.</p>
+<p><a href="#fig-haz_chems_used">Figure&nbsp;4</a> also shows that California always utilizes the most chemicals in each hazard group. In 2016, 2018, 2019, and 2021, California would use at least 13 different kinds of modeartely hazardous chemicals and at least 8 different kinds of slightly hazardous chemicals.</p>
 </section>
 </section>
 
