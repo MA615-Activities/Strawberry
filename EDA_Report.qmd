@@ -1,8 +1,8 @@
 ---
-title: "Stawberries: Exploratory Data Analysis Report"
+title: "Strawberries: Exploratory Data Analysis Report"
 author: Maysen Pagan
 date: 2023 Oct 23
-format: html
+format: pdf
 engine: knitr
 ---
 
